@@ -67,55 +67,56 @@ export abstract class Signal<T> {
     public static _connect(callback: (data: any, source: typeof Signal) => any,
         signalConnection?: SignalConnection): () => void {
         // copy all inherited static properties onto this class instance
+        // (or initialize re-used object)
         var s = this;
-        if (s._self !== s) {
-            s._self = s;
-            s._h1 = s._h1, s._h2 = s._h2, s._h3 = s._h3, s._h4 = s._h4;
-            s._hn = s._hn && s._hn.slice();
-            s._nHandlers = s._nHandlers;
+        if (s.$sigSelf !== s) {
+            s.$sigSelf = s;
+            s.$sigh1 = s.$sigh1, s.$sigh2 = s.$sigh2, s.$sigh3 = s.$sigh3, s.$sigh4 = s.$sigh4;
+            s.$sigHnd = s.$sigHnd && s.$sigHnd.slice();
+            s.$sigNHnd = s.$sigNHnd || 0;
         }
 
         // add handler to the list
-        switch (s._nHandlers++) {
+        switch (s.$sigNHnd++) {
             case 0:
                 // call "up" listener to make sure signals get emitted
-                s._h1 = callback;
+                s.$sigh1 = callback;
                 s.onHandlerConnected && s.onHandlerConnected();
                 break;
-            case 1: s._h2 = callback; break;
-            case 2: s._h3 = callback; break;
-            case 3: s._h4 = callback; break;
-            default: (s._hn || (s._hn = [])).push(callback);
+            case 1: s.$sigh2 = callback; break;
+            case 2: s.$sigh3 = callback; break;
+            case 3: s.$sigh4 = callback; break;
+            default: (s.$sigHnd || (s.$sigHnd = [])).push(callback);
         }
         return () => {
             // remove handler from the list
-            if (s._h1 === callback)
-                [s._h1, s._h2, s._h3, s._h4] =
-                    [s._h2, s._h3, s._h4, s._hn && s._hn!.shift()],
-                    s._nHandlers--;
-            else if (s._h2 === callback)
-                [s._h2, s._h3, s._h4] =
-                    [s._h3, s._h4, s._hn && s._hn!.shift()],
-                    s._nHandlers--;
-            else if (s._h3 === callback)
-                [s._h3, s._h4] =
-                    [s._h4, s._hn && s._hn!.shift()],
-                    s._nHandlers--;
-            else if (s._h4 === callback)
-                s._h4 = s._hn && s._hn!.shift(),
-                    s._nHandlers--;
-            else if (s._nHandlers > 4) {
-                for (var i = s._hn!.length - 1; i >= 0; i--) {
-                    if (s._hn![i] === callback) {
-                        s._hn!.splice(i, 1);
-                        s._nHandlers--;
+            if (s.$sigh1 === callback)
+                [s.$sigh1, s.$sigh2, s.$sigh3, s.$sigh4] =
+                    [s.$sigh2, s.$sigh3, s.$sigh4, s.$sigHnd && s.$sigHnd!.shift()],
+                    s.$sigNHnd--;
+            else if (s.$sigh2 === callback)
+                [s.$sigh2, s.$sigh3, s.$sigh4] =
+                    [s.$sigh3, s.$sigh4, s.$sigHnd && s.$sigHnd!.shift()],
+                    s.$sigNHnd--;
+            else if (s.$sigh3 === callback)
+                [s.$sigh3, s.$sigh4] =
+                    [s.$sigh4, s.$sigHnd && s.$sigHnd!.shift()],
+                    s.$sigNHnd--;
+            else if (s.$sigh4 === callback)
+                s.$sigh4 = s.$sigHnd && s.$sigHnd!.shift(),
+                    s.$sigNHnd--;
+            else if (s.$sigNHnd > 4) {
+                for (var i = s.$sigHnd!.length - 1; i >= 0; i--) {
+                    if (s.$sigHnd![i] === callback) {
+                        s.$sigHnd!.splice(i, 1);
+                        s.$sigNHnd--;
                         break;
                     }
                 }
             }
 
             // check new length: call "down" listener if none
-            if (!s._nHandlers && s.onHandlersDisconnected)
+            if (!s.$sigNHnd && s.onHandlersDisconnected)
                 s.onHandlersDisconnected();
 
             // set disconnected flag
@@ -126,13 +127,13 @@ export abstract class Signal<T> {
     /** [implementation] Remove all handlers */
     public static disconnectAll() {
         // call "down" callback to allow signals to stop for now
-        if (this._nHandlers) {
-            this._h1 = undefined;
-            this._h2 = undefined;
-            this._h3 = undefined;
-            this._h4 = undefined;
-            this._hn = undefined;
-            this._nHandlers = 0;
+        if (this.$sigNHnd) {
+            this.$sigh1 = undefined;
+            this.$sigh2 = undefined;
+            this.$sigh3 = undefined;
+            this.$sigh4 = undefined;
+            this.$sigHnd = undefined;
+            this.$sigNHnd = 0;
             this.onHandlersDisconnected && this.onHandlersDisconnected();
         }
         return this;
@@ -140,22 +141,22 @@ export abstract class Signal<T> {
 
     /** [implementation] Returns true if this signal has any handlers */
     public static isConnected() {
-        return (this._nHandlers > 0);
+        return (this.$sigNHnd > 0);
     }
 
     /** @internal Invoke all handlers synchronously, without creating a Signal instance at all; exceptions in handlers are NOT caught here */
     public static emitSync(data: any) {
-        if (this._nHandlers) {
+        if (this.$sigNHnd) {
             _handlerDeletedSelf = false;
-            while (this._h1 && (this._h1.call(undefined, data, this),
+            while (this.$sigh1 && (this.$sigh1.call(undefined, data, this),
                 _handlerDeletedSelf)) _handlerDeletedSelf = false;
-            while (this._h2 && (this._h2.call(undefined, data, this),
+            while (this.$sigh2 && (this.$sigh2.call(undefined, data, this),
                 _handlerDeletedSelf)) _handlerDeletedSelf = false;
-            while (this._h3 && (this._h3.call(undefined, data, this),
+            while (this.$sigh3 && (this.$sigh3.call(undefined, data, this),
                 _handlerDeletedSelf)) _handlerDeletedSelf = false;
-            while (this._h4 && (this._h4.call(undefined, data, this),
+            while (this.$sigh4 && (this.$sigh4.call(undefined, data, this),
                 _handlerDeletedSelf)) _handlerDeletedSelf = false;
-            var handlers = this._hn;
+            var handlers = this.$sigHnd;
             if (handlers) {
                 for (var i = 0; i < handlers.length; i++) {
                     while (handlers[i] &&
@@ -170,13 +171,13 @@ export abstract class Signal<T> {
     /** @internal Invoke all handlers asynchronously, possibly without creating a Signal instance at all; exceptions in handlers are NOT caught here */
     public static emit(data: any) {
         if (!this.__emittable) throw new TypeError;
-        if (this._nHandlers) {
+        if (this.$sigNHnd) {
             var args = [data, this];
-            if (this._h1) defer(this._h1, args);
-            if (this._h2) defer(this._h2, args);
-            if (this._h3) defer(this._h3, args);
-            if (this._h4) defer(this._h4, args);
-            var handlers = this._hn;
+            if (this.$sigh1) defer(this.$sigh1, args);
+            if (this.$sigh2) defer(this.$sigh2, args);
+            if (this.$sigh3) defer(this.$sigh3, args);
+            if (this.$sigh4) defer(this.$sigh4, args);
+            var handlers = this.$sigHnd;
             if (handlers) {
                 for (var i = 0, len = handlers.length; i < len; i++)
                     handlers[i] && defer(handlers[i], args);
@@ -190,21 +191,25 @@ export abstract class Signal<T> {
     /** Static method that is called synchronously when no more handlers are connected; override this in a signal base class, e.g. to add a delayed deallocation method */
     protected static onHandlersDisconnected?: () => void;
 
+    // NOTE on naming below: the ObservableValue class adopts the static methods
+    // of the Signal class and re-uses its own instance, with $sig properties
+    // below used by the Signal methods.
+
     /** @internal Handler function 1 (performance optimization) */
-    private static _h1?: (data: any, source: typeof Signal) => any;
+    private static $sigh1?: (data: any, source: typeof Signal) => any;
     /** @internal Handler function 2 (performance optimization) */
-    private static _h2?: (data: any, source: typeof Signal) => any;
+    private static $sigh2?: (data: any, source: typeof Signal) => any;
     /** @internal Handler function 3 (performance optimization) */
-    private static _h3?: (data: any, source: typeof Signal) => any;
+    private static $sigh3?: (data: any, source: typeof Signal) => any;
     /** @internal Handler function 4 (performance optimization) */
-    private static _h4?: (data: any, source: typeof Signal) => any;
+    private static $sigh4?: (data: any, source: typeof Signal) => any;
     /** @internal All other handler functions */
-    private static _hn?: ((data: any, source: typeof Signal) => any)[];
+    private static $sigHnd?: ((data: any, source: typeof Signal) => any)[];
     /** @internal Number of handlers */
-    private static _nHandlers = 0;
+    private static $sigNHnd = 0;
 
     /** @internal Class reference, set when connecting a first handler, used to prevent mixing properties from base and derived classes; doing so would cause problems with inherited static members above */
-    private static _self: typeof Signal;
+    private static $sigSelf: typeof Signal;
 
     /** @internal Set to true by `defineSignal`, if this property is not defined then this signal should not be constructable/emittable */
     public static __emittable?: boolean;
@@ -228,14 +233,14 @@ export abstract class Signal<T> {
     public emit(noResults?: boolean) {
         if (this._emitted) return this;
         this._emitted = true;
-        var nHandlers = (<typeof Signal>this.constructor)._nHandlers;
+        var nHandlers = (<typeof Signal>this.constructor).$sigNHnd;
         if (!nHandlers) return this;
 
-        var handler1 = (<typeof Signal>this.constructor)._h1;
-        var handler2 = (<typeof Signal>this.constructor)._h2;
-        var handler3 = (<typeof Signal>this.constructor)._h3;
-        var handler4 = (<typeof Signal>this.constructor)._h4;
-        var handlers = (<typeof Signal>this.constructor)._hn;
+        var handler1 = (<typeof Signal>this.constructor).$sigh1;
+        var handler2 = (<typeof Signal>this.constructor).$sigh2;
+        var handler3 = (<typeof Signal>this.constructor).$sigh3;
+        var handler4 = (<typeof Signal>this.constructor).$sigh4;
+        var handlers = (<typeof Signal>this.constructor).$sigHnd;
         var args = [this._data, this.constructor];
         if (!noResults) {
             // intialize an array of Promises
@@ -356,7 +361,7 @@ export function defineSignal(Base = Signal, props?: any): any {
         }
     };
     for (var p in props) Result[p] = props[p];
-    (<any>Result)._nHandlers = 0;
+    (<any>Result).$sigNHnd = 0;
     Result.__emittable = true;
     return Result;
 }

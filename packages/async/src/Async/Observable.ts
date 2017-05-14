@@ -199,10 +199,10 @@ export class ObservableValue<T> {
                 // (until next value is evaluated, or this observable is
                 // unsubscribed from)
                 var proxied = (<ObservableValue<T>>value);
-                var sig = proxied._Signal || proxied._sig();
+                var sig = <Signal.Emittable<T, typeof Signal>><any>proxied;
                 this._proxyConnection = sig.connect(v => {
                     if (this._val === <any>proxied)
-                        this._Signal.emitSync(v);
+                        (<Signal.Emittable<T, typeof Signal>><any>this).emitSync(v);
                 });
             }
             value = value.value;
@@ -216,7 +216,7 @@ export class ObservableValue<T> {
         // emit signal(s) if changed
         if (hadValue && this._val !== oldValue) {
             this._auxCallbacks && this._auxCallbacks.forEach(f => f());
-            this._Signal && this._Signal.emitSync(value!);
+            (<Signal.Emittable<T, typeof Signal>><any>this).emitSync(value!);
         }
 
         return value;
@@ -267,7 +267,7 @@ export class ObservableValue<T> {
             // set value and emit signal(s)
             this._val = value;
             this._auxCallbacks && this._auxCallbacks.forEach(f => f());
-            this._Signal && this._Signal.emitSync(value!);
+            (<Signal.Emittable<T, typeof Signal>><any>this).emitSync(value!);
         }
     }
 
@@ -303,7 +303,7 @@ export class ObservableValue<T> {
     public subscribe(callback: (value: T) => any): this;
 
     public subscribe(callback?: (value: T) => any) {
-        (this._Signal || this._sig())._connect(<any>callback);
+        (<Signal.Emittable<T, typeof Signal>><any>this)._connect(<any>callback);
 
         // listen for signal emissions while initializing value if needed
         var current = this._val, emitted = false, f: any;
@@ -326,7 +326,7 @@ export class ObservableValue<T> {
         if (!this._valIdx) this._valIdx = -1;
 
         return new Promise<T>(resolve => {
-            (this._Signal || this._sig()).connectOnce(v => { resolve(v) });
+            (<Signal.Emittable<T, typeof Signal>><any>this).connectOnce(v => { resolve(v) });
         });
     }
 
@@ -399,7 +399,7 @@ export class ObservableValue<T> {
             // add handler to mark this value as dirty whenever other value
             // changes (not async since signal is always emitted synchronously,
             // see above); _connect returns disconnect method
-            var dis = (other._Signal || other._sig())._connect(
+            var dis = (<Signal.Emittable<T, typeof Signal>><any>other)._connect(
                 this._asyncEval.bind(this));
 
             // store new dependency object
@@ -437,31 +437,24 @@ export class ObservableValue<T> {
         }
     }
 
-    /** @internal Instantiate and return the value change signal */
-    private _sig() {
-        let onHandlerConnected = () => {
-            this._watched = true;
-            if (!this._depChecks || this._depChecks.length) {
-                // not sure about dependencies, force re-eval
-                this._removeDependencies();
-                this._dirtyIdx++;
-            }
-            else {
-                // no dependencies last time, no need to check
-                this._removeDependencies();
-            }
-        };
-        let onHandlersDisconnected = () => {
-            // all handlers have been disconnected:
-            this._watched = false;
+    /** @internal handler for first signal connection */
+    protected onHandlerConnected() {
+        this._watched = true;
+        if (!this._depChecks || this._depChecks.length) {
+            // not sure about dependencies, force re-eval
             this._removeDependencies();
-        };
+            this._dirtyIdx++;
+        }
+        else {
+            // no dependencies last time, no need to check
+            this._removeDependencies();
+        }
+    }
 
-        // use plain defineSignal and add handlers manually (perf)
-        var sig = this._Signal = defineSignal<T>();
-        (<any>sig).onHandlerConnected = onHandlerConnected;
-        (<any>sig).onHandlersDisconnected = onHandlersDisconnected;
-        return sig;
+    /** @internal handler for last signal disconnection */
+    protected onHandlersDisconnected() {
+        this._watched = false;
+        this._removeDependencies();
     }
 
     /** @internal Unique ID used to quickly index dependants of observables */
@@ -520,10 +513,14 @@ export class ObservableValue<T> {
 
     /** @internal Connection for proxied observable signal, if any */
     private _proxyConnection: SignalConnection;
-
-    /** @internal Signal that is emitted (synchronously) when value changes */
-    private _Signal: Signal.Emittable<T, typeof Signal>;
 }
+
+// NOTE: mixing in required signal methods here for better performance,
+// repurposing ObservableValue instances as their own change signals
+(<typeof Signal><any>ObservableValue.prototype)._connect = Signal._connect;
+(<typeof Signal><any>ObservableValue.prototype).connect = Signal.connect;
+(<typeof Signal><any>ObservableValue.prototype).connectOnce = Signal.connectOnce;
+(<typeof Signal><any>ObservableValue.prototype).emitSync = Signal.emitSync;
 
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
