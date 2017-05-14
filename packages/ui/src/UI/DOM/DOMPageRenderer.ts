@@ -286,9 +286,11 @@ class DOMPageRenderer extends PageRenderer {
         }
         else {
             // insert element directly into the wrapper, clear other nodes
-            wrapper.appendChild(element);
-            while (element.previousSibling)
-                wrapper.removeChild(element.previousSibling);
+            if (wrapper.firstChild !== element || wrapper.lastChild !== element) {
+                wrapper.appendChild(element);
+                while (element.previousSibling)
+                    wrapper.removeChild(element.previousSibling);
+            }
 
             // fix absolutely positioned elements with a "bottom" property
             // to the bottom of the screen ONLY, otherwise to the top ONLY
