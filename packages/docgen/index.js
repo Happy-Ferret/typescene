@@ -550,7 +550,7 @@ function generateAsync(/* ...sourceDirs: string[] */) {
                             item.isDecorator = true;
 
                         // merge with existing item, if any
-                        var existing = declItems[id];
+                        var existing = declItems[item.id];
                         if (existing) {
                             // enumerate declarations for same IDs
                             if (!item.isNamespace) {

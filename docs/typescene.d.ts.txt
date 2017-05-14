@@ -2873,14 +2873,14 @@ declare module "@typescene/ui/UI/DOM/DOMUpdater" {
 
 declare module "@typescene/ui/UI/DOM" {
 export { DOM } from "@typescene/ui/UI/DOM/DOM";
-import "./DOMDrag";
-import "./DOMEvents";
-import "./DOMPageRenderer";
-import "./DOMUpdater";
-import "./Renderers";
-import "./Toast";
-import "./PopOver";
-import "./Menu";
+import "@typescene/ui/UI/DOM/DOMDrag";
+import "@typescene/ui/UI/DOM/DOMEvents";
+import "@typescene/ui/UI/DOM/DOMPageRenderer";
+import "@typescene/ui/UI/DOM/DOMUpdater";
+import "@typescene/ui/UI/DOM/Renderers";
+import "@typescene/ui/UI/DOM/Toast";
+import "@typescene/ui/UI/DOM/PopOver";
+import "@typescene/ui/UI/DOM/Menu";
 export { DOMAnimation } from "@typescene/ui/UI/DOM/DOMAnimation";
 export { DOMBlock } from "@typescene/ui/UI/DOM/DOMBlock";
 
@@ -3003,33 +3003,33 @@ declare module "@typescene/ui/UI/DOM/Renderers/Controls/Spacer" {
 }
 
 declare module "@typescene/ui/UI/DOM/Renderers" {
-import "./Containers/Container";
-import "./Containers/DialogContainer";
-import "./Containers/DrawerContainer";
-import "./Containers/LayoutContainer";
-import "./Blocks/Block";
-import "./Blocks/Card";
-import "./Blocks/ContainerBlock";
-import "./Blocks/Divider";
-import "./Blocks/List";
-import "./Blocks/NavList";
-import "./Blocks/Row";
-import "./Blocks/Table";
-import "./Blocks/TableRow";
-import "./Controls/BlockControl";
-import "./Controls/Button";
-import "./Controls/ButtonGroup";
-import "./Controls/ContainerControl";
-import "./Controls/ControlElement";
-import "./Controls/ControlStack";
-import "./Controls/Icon";
-import "./Controls/Image";
-import "./Controls/Label";
-import "./Controls/ProgressBar";
-import "./Controls/Spacer";
-import "./Controls/InputControls/Checkbox";
-import "./Controls/InputControls/SelectField";
-import "./Controls/InputControls/TextField";
+import "@typescene/ui/UI/DOM/Renderers/Containers/Container";
+import "@typescene/ui/UI/DOM/Renderers/Containers/DialogContainer";
+import "@typescene/ui/UI/DOM/Renderers/Containers/DrawerContainer";
+import "@typescene/ui/UI/DOM/Renderers/Containers/LayoutContainer";
+import "@typescene/ui/UI/DOM/Renderers/Blocks/Block";
+import "@typescene/ui/UI/DOM/Renderers/Blocks/Card";
+import "@typescene/ui/UI/DOM/Renderers/Blocks/ContainerBlock";
+import "@typescene/ui/UI/DOM/Renderers/Blocks/Divider";
+import "@typescene/ui/UI/DOM/Renderers/Blocks/List";
+import "@typescene/ui/UI/DOM/Renderers/Blocks/NavList";
+import "@typescene/ui/UI/DOM/Renderers/Blocks/Row";
+import "@typescene/ui/UI/DOM/Renderers/Blocks/Table";
+import "@typescene/ui/UI/DOM/Renderers/Blocks/TableRow";
+import "@typescene/ui/UI/DOM/Renderers/Controls/BlockControl";
+import "@typescene/ui/UI/DOM/Renderers/Controls/Button";
+import "@typescene/ui/UI/DOM/Renderers/Controls/ButtonGroup";
+import "@typescene/ui/UI/DOM/Renderers/Controls/ContainerControl";
+import "@typescene/ui/UI/DOM/Renderers/Controls/ControlElement";
+import "@typescene/ui/UI/DOM/Renderers/Controls/ControlStack";
+import "@typescene/ui/UI/DOM/Renderers/Controls/Icon";
+import "@typescene/ui/UI/DOM/Renderers/Controls/Image";
+import "@typescene/ui/UI/DOM/Renderers/Controls/Label";
+import "@typescene/ui/UI/DOM/Renderers/Controls/ProgressBar";
+import "@typescene/ui/UI/DOM/Renderers/Controls/Spacer";
+import "@typescene/ui/UI/DOM/Renderers/Controls/InputControls/Checkbox";
+import "@typescene/ui/UI/DOM/Renderers/Controls/InputControls/SelectField";
+import "@typescene/ui/UI/DOM/Renderers/Controls/InputControls/TextField";
 
 }
 
@@ -3761,11 +3761,11 @@ export namespace Http {
     /** Perform a GET request with given parameters and headers, if any; returns a promise that resolves to the parsed JSON response (or undefined if response was empty), or gets rejected if the request fails or response status is not in 2xx range */
     function getAsync(url: string, params?: any, headers?: Headers | FetchHeaders): PromiseLike<any>;
     /** Perform a POST request with given object (sent as JSON) and headers, if any; returns a promise that resolves to the parsed JSON response (or undefined if response was empty), or gets rejected if the request fails or response status is not in 2xx range */
-    function postAsync(url: string, data?: any, headers?: Headers): PromiseLike<FetchResponse>;
+    function postAsync(url: string, data?: any, headers?: Headers): PromiseLike<any>;
     /** Perform a PUT request with given object (sent as JSON) and headers, if any; returns a promise that resolves to the parsed JSON response (or undefined if response was empty), or gets rejected if the request fails or response status is not in 2xx range */
-    function putAsync(url: string, data?: any, headers?: Headers): PromiseLike<FetchResponse>;
+    function putAsync(url: string, data?: any, headers?: Headers): PromiseLike<any>;
     /** Perform a DELETE request with given object (sent as JSON) and headers, if any; returns a promise that resolves to the parsed JSON response (or undefined if response was empty), or gets rejected if the request fails or response status is not in 2xx range */
-    function deleteAsync(url: string, data?: any, headers?: Headers): PromiseLike<FetchResponse>;
+    function deleteAsync(url: string, data?: any, headers?: Headers): PromiseLike<any>;
 }
 
 }

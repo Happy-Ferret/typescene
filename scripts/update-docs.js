@@ -96,7 +96,7 @@ function combineAsync(dtsPath, baseID) {
                 var decl = m.replace(/\/index$/, "");
                 txt = `declare module "${decl}" {\n${txt}\n}\n`;
                 if (/from\s+\'/.test(txt)) throw new Error("Single quote import");
-                txt = txt.replace(/^((?:import|export)[^\n]+from )\"(\.[^\"]+)\"/gm, (s, s1, s2) => {
+                txt = txt.replace(/^((?:import|export)[^\n]+from |import )\"(\.[^\"]+)\"/gm, (s, s1, s2) => {
                     var b = m.replace(/\/[^\/]+$/, "/");
                     var result = b + s2;
                     while (true) {

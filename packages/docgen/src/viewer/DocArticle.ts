@@ -4,7 +4,8 @@ import { DocItem } from "./DocumentData";
 import { CodeOutputContainer } from "./CodeOutput";
 declare var hljs;
 
-const TAG_BG_CLASSTYPE = "#888";
+const TAG_BG_CLASSTYPE = "#333";
+const TAG_BG_INTFTYPE = "#888";
 const TAG_BG_CTOR = "#c3e";
 const TAG_BG_MEMBERTYPE = "#38e";
 const TAG_BG_ASYNC = "#ac6";
@@ -299,8 +300,8 @@ export class TagLabelRow extends UI.CloseRow {
                 this.content.push(label, new HalfSpacer());
             }
             if (item.isClass) add("class", TAG_BG_CLASSTYPE);
-            else if (item.isInterface) add("interface", TAG_BG_CLASSTYPE);
             else if (item.isNamespace) add("namespace", TAG_BG_CLASSTYPE);
+            else if (item.isInterface) add("interface", TAG_BG_INTFTYPE);
             else if (item.isCtor) add("constructor", TAG_BG_CTOR);
             else if (item.isMethod) add("method", TAG_BG_MEMBERTYPE);
             else if (item.isSignal) add("signal", TAG_BG_ASYNC);

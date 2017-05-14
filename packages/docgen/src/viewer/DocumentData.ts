@@ -123,8 +123,10 @@ export class DocumentData {
             result._itemsById[item.id] = item;
 
             // populate icon name (TODO: separate this out)
-            if (item.isClass || item.isInterface || item.isNamespace)
+            if (item.isClass || item.isNamespace)
                 item.icon = "fa-cubes";
+            else if (item.isInterface)
+                item.icon = "fa-cubes opacity=.7";
             else if (item.isCtor)
                 item.icon = "fa-magic";
             else if (item.isSignal)
